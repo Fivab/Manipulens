@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Manipulens</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#050810;
+--bg2:#0a0f1e;
+--bg3:#0d1428;
+--glass:rgba(255,255,255,0.04);
+--glass2:rgba(255,255,255,0.07);
+--border:rgba(99,179,237,0.15);
+--border2:rgba(99,179,237,0.3);
+--cyan:#63b3ed;
+--cyan2:#90cdf4;
+--red:#fc8181;
+--orange:#f6ad55;
+--green:#68d391;
+--purple:#b794f4;
+--pink:#f687b3;
+--yellow:#faf089;
+--text:#e2e8f0;
+--text2:#94a3b8;
+--text3:#64748b;
+--mono:'JetBrains Mono',monospace;
+--sans:'Space Grotesk',sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.noise{position:fixed;inset:0;opacity:0.03;pointer-events:none;z-index:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(99,179,237,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,179,237,0.03) 1px,transparent 1px);background-size:40px 40px}
+.glow-orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+.orb1{width:600px;height:600px;background:radial-gradient(circle,rgba(99,179,237,0.08),transparent 70%);top:-200px;left:-100px}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,rgba(183,148,244,0.06),transparent 70%);bottom:-100px;right:-100px}
+.app{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:20px}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0 32px}
+.logo{font-size:22px;font-weight:700;letter-spacing:-0.5px;background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo span{font-weight:300;opacity:0.7}
+.nav-links{display:flex;gap:4px}
+.nav-btn{background:none;border:none;color:var(--text2);font-family:var(--sans);font-size:13px;padding:7px 14px;border-radius:8px;cursor:pointer;transition:all 0.2s}
+.nav-btn:hover,.nav-btn.active{background:var(--glass2);color:var(--cyan);border:0.5px solid var(--border)}
+.nav-badge{background:linear-gradient(135deg,var(--cyan),var(--purple));color:#050810;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px}
+
+/* PAGES */
+.page{display:none;animation:fadeIn 0.4s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* LANDING */
+.hero{text-align:center;padding:60px 0 50px}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;background:var(--glass);border:0.5px solid var(--border);padding:6px 14px;border-radius:20px;font-size:11px;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:28px}
+.pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(99,179,237,0.4)}50%{opacity:0.5;box-shadow:0 0 0 6px rgba(99,179,237,0)}}
+h1{font-size:clamp(36px,6vw,64px);font-weight:700;line-height:1.1;letter-spacing:-2px;margin-bottom:20px}
+h1 .grad{background:linear-gradient(135deg,var(--cyan) 0%,var(--purple) 50%,var(--pink) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:17px;color:var(--text2);max-width:560px;margin:0 auto 40px;line-height:1.6}
+.cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:linear-gradient(135deg,var(--cyan),var(--purple));border:none;color:#050810;font-family:var(--sans);font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;cursor:pointer;transition:all 0.2s;letter-spacing:0.3px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,179,237,0.3)}
+.btn-ghost{background:var(--glass);border:0.5px solid var(--border2);color:var(--text);font-family:var(--sans);font-size:14px;padding:12px 28px;border-radius:10px;cursor:pointer;transition:all 0.2s}
+.btn-ghost:hover{background:var(--glass2);border-color:var(--cyan)}
+
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:60px 0}
+.feat-card{background:var(--glass);border:0.5px solid var(--border);border-radius:14px;padding:24px;transition:all 0.3s}
+.feat-card:hover{border-color:var(--border2);background:var(--glass2);transform:translateY(-3px)}
+.feat-icon{font-size:28px;margin-bottom:14px}
+.feat-card h3{font-size:15px;font-weight:600;margin-bottom:8px;color:var(--text)}
+.feat-card p{font-size:13px;color:var(--text2);line-height:1.6}
+
+/* ANALYZER */
+.analyzer-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+@media(max-width:720px){.analyzer-layout{grid-template-columns:1fr}}
+.panel{background:var(--glass);border:0.5px solid var(--border);border-radius:16px;padding:24px}
+.panel-title{font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+textarea{width:100%;background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:13px;padding:16px;resize:vertical;min-height:160px;outline:none;transition:border 0.2s;line-height:1.6}
+textarea:focus{border-color:var(--cyan)}
+textarea::placeholder{color:var(--text3)}
+.examples-row{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.ex-btn{background:var(--bg2);border:0.5px solid var(--border);color:var(--text2);font-family:var(--sans);font-size:11px;padding:6px 12px;border-radius:20px;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.ex-btn:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(99,179,237,0.08)}
+.analyze-btn{width:100%;margin-top:14px;background:linear-gradient(135deg,var(--cyan),var(--purple));border:none;color:#050810;font-family:var(--sans);font-size:14px;font-weight:700;padding:14px;border-radius:10px;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px;position:relative;overflow:hidden}
+.analyze-btn:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(99,179,237,0.3)}
+.analyze-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+.analyze-btn .shimmer{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transform:translateX(-100%);animation:shimmer 1.5s infinite}
+@keyframes shimmer{to{transform:translateX(100%)}}
+
+/* METER */
+.meter-wrap{text-align:center;padding:20px 0 10px}
+.meter-label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:12px}
+.meter-circle{position:relative;width:140px;height:140px;margin:0 auto 12px}
+.meter-circle svg{transform:rotate(-90deg)}
+.meter-value{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.meter-num{font-size:38px;font-weight:700;font-family:var(--mono);background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.meter-sub{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
+
+/* SCORES */
+.score-list{display:flex;flex-direction:column;gap:14px}
+.score-item{}
+.score-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.score-name{font-size:12px;color:var(--text2);font-weight:500}
+.score-val{font-size:12px;font-family:var(--mono);font-weight:600}
+.score-bar-bg{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden}
+.score-bar{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1);width:0}
+
+/* BADGES */
+.badges-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.badge{font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;letter-spacing:0.5px;display:flex;align-items:center;gap:5px}
+.badge-red{background:rgba(252,129,129,0.15);border:0.5px solid rgba(252,129,129,0.3);color:var(--red)}
+.badge-orange{background:rgba(246,173,85,0.15);border:0.5px solid rgba(246,173,85,0.3);color:var(--orange)}
+.badge-purple{background:rgba(183,148,244,0.15);border:0.5px solid rgba(183,148,244,0.3);color:var(--purple)}
+.badge-green{background:rgba(104,211,145,0.15);border:0.5px solid rgba(104,211,145,0.3);color:var(--green)}
+.badge-cyan{background:rgba(99,179,237,0.15);border:0.5px solid rgba(99,179,237,0.3);color:var(--cyan)}
+
+/* EXPLANATION */
+.explanation-box{background:rgba(99,179,237,0.05);border:0.5px solid rgba(99,179,237,0.2);border-radius:12px;padding:16px;margin-top:16px}
+.explanation-box p{font-size:13px;color:var(--text2);line-height:1.7;font-style:italic}
+.ai-tag{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:8px;opacity:0.7}
+
+/* CHART */
+.chart-panel{margin-top:24px}
+.radar-wrap{position:relative;height:220px}
+
+/* ACTIONS */
+.action-row{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.action-btn{background:var(--glass);border:0.5px solid var(--border);color:var(--text2);font-family:var(--sans);font-size:12px;padding:8px 16px;border-radius:8px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px}
+.action-btn:hover{border-color:var(--border2);color:var(--text);background:var(--glass2)}
+.action-btn svg{width:14px;height:14px;opacity:0.7}
+
+/* HISTORY */
+.history-list{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.history-item{background:var(--glass);border:0.5px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all 0.2s}
+.history-item:hover{border-color:var(--border2);background:var(--glass2)}
+.history-text{font-size:12px;color:var(--text2);margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.history-meta{display:flex;align-items:center;gap:10px}
+.history-score{font-size:18px;font-weight:700;font-family:var(--mono)}
+.history-time{font-size:11px;color:var(--text3)}
+
+/* TYPING */
+.typing-anim{display:flex;align-items:center;gap:8px;padding:12px 0;color:var(--cyan);font-size:13px;font-family:var(--mono)}
+.typing-dots{display:flex;gap:4px}
+.typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:bounce 1.2s infinite}
+.typing-dots span:nth-child(2){animation-delay:0.2s}
+.typing-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-8px)}}
+
+/* ABOUT */
+.about-hero{text-align:center;padding:50px 0 40px}
+.about-hero h2{font-size:40px;font-weight:700;letter-spacing:-1.5px;margin-bottom:16px}
+.about-content{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:40px}
+@media(max-width:600px){.about-content{grid-template-columns:1fr}}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:16px}
+.team-card{background:var(--glass);border:0.5px solid var(--border);border-radius:14px;padding:20px;text-align:center;transition:all 0.3s}
+.team-card:hover{border-color:var(--border2);transform:translateY(-3px)}
+.avatar{width:56px;height:56px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:22px;border:1.5px solid var(--border2)}
+.team-name{font-size:14px;font-weight:600;margin-bottom:4px}
+.team-role{font-size:11px;color:var(--text3);letter-spacing:0.5px}
+
+/* SECTION TITLE */
+.sec-title{font-size:20px;font-weight:700;letter-spacing:-0.5px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.sec-title .line{height:2px;flex:1;background:linear-gradient(90deg,var(--border2),transparent)}
+
+/* SIMULATOR */
+.sim-wrap{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px}
+.sim-post{background:#1a2332;border-radius:12px;padding:16px;border:0.5px solid rgba(99,179,237,0.1)}
+.sim-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sim-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;background:linear-gradient(135deg,var(--cyan),var(--purple));color:#050810}
+.sim-name{font-size:13px;font-weight:600}
+.sim-handle{font-size:11px;color:var(--text3)}
+.sim-body{font-size:14px;line-height:1.6;color:var(--text);min-height:40px}
+.sim-footer{display:flex;gap:16px;margin-top:12px;font-size:11px;color:var(--text3)}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:40px;color:var(--text3)}
+.empty-state .icon{font-size:48px;margin-bottom:16px;opacity:0.3}
+.empty-state p{font-size:14px;line-height:1.6}
+
+/* NOTIFICATION */
+.notif{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:10px;padding:12px 18px;font-size:13px;color:var(--text);z-index:9999;transform:translateY(60px);opacity:0;transition:all 0.3s;max-width:280px}
+.notif.show{transform:translateY(0);opacity:1}
+.loading-bar{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--purple));z-index:9999;transition:width 0.3s;width:0}
+
+/* RISK LEVEL */
+.risk-indicator{text-align:center;margin-top:8px}
+.risk-label{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="grid-bg"></div>
+<div class="glow-orb orb1"></div>
+<div class="glow-orb orb2"></div>
+<div class="loading-bar" id="loadingBar"></div>
+<div class="notif" id="notif"></div>
+
+<div class="app">
+<nav>
+  <div class="logo">Manipu<span>lens</span></div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="showPage('landing')">Home</button>
+    <button class="nav-btn" onclick="showPage('analyzer')">Analyzer <span class="nav-badge">AI</span></button>
+    <button class="nav-btn" onclick="showPage('about')">About</button>
+  </div>
+</nav>
+
+<!-- LANDING PAGE -->
+<div class="page active" id="page-landing">
+  <div class="hero">
+    <div class="hero-tag"><div class="pulse-dot"></div>AI-Powered Psychological Analysis</div>
+    <h1>See Through the<br><span class="grad">Manipulation</span></h1>
+    <p class="hero-sub">Manipulens detects emotional manipulation tactics in text — fear, anger, urgency, clickbait, and psychological pressure patterns using advanced AI analysis.</p>
+    <div class="cta-row">
+      <button class="btn-primary" onclick="showPage('analyzer')">Analyze Text Now</button>
+      <button class="btn-ghost" onclick="showPage('about')">Learn More</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin:20px 0">
+    <div class="sim-wrap">
+      <div class="panel-title">🧪 Live Demo — Fake Post Simulator</div>
+      <div class="sim-post">
+        <div class="sim-header">
+          <div class="sim-avatar">M</div>
+          <div><div class="sim-name">ManipBot2024</div><div class="sim-handle">@realtruth_news</div></div>
+        </div>
+        <div class="sim-body" id="simBody">BREAKING: They're hiding this from you!! The TRUTH they don't want you to see 🚨🔥 Share before it's deleted!!!!</div>
+        <div class="sim-footer">
+          <span>💬 1.2K</span><span>🔁 8.4K</span><span>❤️ 22K</span>
+        </div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="ex-btn" onclick="setSimPost('fear')">😱 Fear Post</button>
+        <button class="ex-btn" onclick="setSimPost('anger')">😤 Rage Bait</button>
+        <button class="ex-btn" onclick="setSimPost('clickbait')">👆 Clickbait</button>
+        <button class="ex-btn" onclick="setSimPost('neutral')">📰 Neutral</button>
+      </div>
+      <button class="analyze-btn" style="margin-top:12px" onclick="analyzeSimPost()">Analyze This Post →</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">⚡ Detection Capabilities</div>
+      <div class="score-list">
+        <div class="score-item">
+          <div class="score-header"><span class="score-name">Fear Manipulation</span><span class="score-val" style="color:var(--red)">DETECTED</span></div>
+          <div class="score-bar-bg"><div class="score-bar" style="width:82%;background:linear-gradient(90deg,var(--red),#ff4d4d)"></div></div>
+        </div>
+        <div class="score-item">
+          <div class="score-header"><span class="score-name">Anger Triggers</span><span class="score-val" style="color:var(--orange)">HIGH</span></div>
+          <div class="score-bar-bg"><div class="score-bar" style="width:74%;background:linear-gradient(90deg,var(--orange),#ff8c00)"></div></div>
+        </div>
+        <div class="score-item">
+          <div class="score-header"><span class="score-name">Clickbait Pattern</span><span class="score-val" style="color:var(--purple)">EXTREME</span></div>
+          <div class="score-bar-bg"><div class="score-bar" style="width:91%;background:linear-gradient(90deg,var(--purple),#9b59b6)"></div></div>
+        </div>
+        <div class="score-item">
+          <div class="score-header"><span class="score-name">Neutrality Index</span><span class="score-val" style="color:var(--green)">LOW</span></div>
+          <div class="score-bar-bg"><div class="score-bar" style="width:12%;background:linear-gradient(90deg,var(--green),#00c851)"></div></div>
+        </div>
+        <div class="score-item">
+          <div class="score-header"><span class="score-name">Toxicity Level</span><span class="score-val" style="color:var(--pink)">MODERATE</span></div>
+          <div class="score-bar-bg"><div class="score-bar" style="width:48%;background:linear-gradient(90deg,var(--pink),#e91e63)"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon">🧠</div>
+      <h3>Psychological Analysis</h3>
+      <p>Detects fear, urgency, anger, and emotional pressure patterns using advanced prompt engineering.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📊</div>
+      <h3>7-Axis Scoring</h3>
+      <p>Quantifies manipulation across 7 dimensions with a unified Manipulation Meter score.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⚡</div>
+      <h3>Real-time AI</h3>
+      <p>Powered by Grok AI with instant analysis of tweets, headlines, articles, and captions.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🎯</div>
+      <h3>Bias Detection</h3>
+      <p>Identifies political, emotional, commercial, and ideological bias patterns in content.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYZER PAGE -->
+<div class="page" id="page-analyzer">
+  <div style="margin-bottom:28px">
+    <div class="hero-tag" style="margin-bottom:16px"><div class="pulse-dot"></div>Psychological Manipulation Detector</div>
+    <h2 style="font-size:28px;font-weight:700;letter-spacing:-1px;margin-bottom:8px">Analyze Any Text</h2>
+    <p style="font-size:14px;color:var(--text2)">Paste tweets, headlines, ads, captions, or any text to reveal hidden manipulation tactics.</p>
+  </div>
+
+  <div class="analyzer-layout">
+    <!-- Input Panel -->
+    <div>
+      <div class="panel">
+        <div class="panel-title">📝 Text Input</div>
+        <textarea id="inputText" placeholder="Paste any text here — tweet, headline, ad copy, YouTube title, article excerpt...&#10;&#10;Example: &quot;SHOCKING: Scientists WARN this everyday habit could KILL you — find out before it's too late!&quot;"></textarea>
+        <div style="font-size:11px;color:var(--text3);margin-top:6px;text-align:right" id="charCount">0 characters</div>
+        
+        <div class="panel-title" style="margin-top:20px">🧪 Quick Examples</div>
+        <div class="examples-row">
+          <button class="ex-btn" onclick="loadExample('political')">🗳️ Political Tweet</button>
+          <button class="ex-btn" onclick="loadExample('clickbait')">👆 Clickbait</button>
+          <button class="ex-btn" onclick="loadExample('fear')">😱 Fear Marketing</button>
+          <button class="ex-btn" onclick="loadExample('neutral')">📰 Neutral News</button>
+        </div>
+        
+        <button class="analyze-btn" id="analyzeBtn" onclick="runAnalysis()">
+          <span id="btnText">🔍 Analyze Manipulation</span>
+          <div class="shimmer" id="btnShimmer" style="display:none"></div>
+        </button>
+      </div>
+
+      <!-- History -->
+      <div class="panel" style="margin-top:20px">
+        <div class="panel-title">🕒 Analysis History</div>
+        <div class="history-list" id="historyList">
+          <div class="empty-state">
+            <div class="icon">📋</div>
+            <p>No analyses yet.<br>Run your first analysis above.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Panel -->
+    <div>
+      <div class="panel" id="resultsPanel">
+        <div id="emptyResults" class="empty-state">
+          <div class="icon">🔮</div>
+          <p>Your manipulation analysis<br>results will appear here.<br><br>Paste text and hit Analyze.</p>
+        </div>
+        
+        <div id="typingState" style="display:none">
+          <div class="panel-title">🤖 AI Processing</div>
+          <div class="typing-anim">
+            <div class="typing-dots"><span></span><span></span><span></span></div>
+            <span id="typingMsg">Analyzing psychological patterns...</span>
+          </div>
+          <div style="height:200px;display:flex;align-items:center;justify-content:center">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(99,179,237,0.1)" stroke-width="1"/>
+              <circle cx="60" cy="60" r="40" fill="none" stroke="rgba(183,148,244,0.1)" stroke-width="1"/>
+              <circle cx="60" cy="60" r="30" fill="none" stroke="rgba(99,179,237,0.1)" stroke-width="1"/>
+              <circle cx="60" cy="60" r="8" fill="rgba(99,179,237,0.3)"/>
+              <g id="scanLine">
+                <line x1="60" y1="60" x2="110" y2="60" stroke="var(--cyan)" stroke-width="1.5" opacity="0.6"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <div id="resultsContent" style="display:none">
+          <!-- Manipulation Meter -->
+          <div class="meter-wrap">
+            <div class="meter-label">Manipulation Meter</div>
+            <div class="meter-circle">
+              <svg width="140" height="140" viewBox="0 0 140 140">
+                <circle cx="70" cy="70" r="58" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
+                <circle cx="70" cy="70" r="58" fill="none" stroke="url(#meterGrad)" stroke-width="8" stroke-linecap="round"
+                  stroke-dasharray="364" id="meterArc" stroke-dashoffset="364" style="transition:stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1)"/>
+                <defs>
+                  <linearGradient id="meterGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#63b3ed"/>
+                    <stop offset="100%" stop-color="#b794f4"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="meter-value">
+                <div class="meter-num" id="meterNum">0</div>
+                <div class="meter-sub">/ 100</div>
+              </div>
+            </div>
+            <div class="risk-indicator">
+              <div class="risk-label" id="riskLabel" style="color:var(--green)">LOW RISK</div>
+            </div>
+          </div>
+
+          <!-- Score Bars -->
+          <div class="score-list" id="scoreBars" style="margin-top:20px"></div>
+
+          <!-- Badges -->
+          <div class="badges-row" id="badgesRow"></div>
+
+          <!-- AI Explanation -->
+          <div class="explanation-box" id="explanationBox">
+            <div class="ai-tag">AI Insight</div>
+            <p id="explanationText"></p>
+          </div>
+
+          <!-- Chart -->
+          <div style="margin-top:20px">
+            <div class="panel-title">📊 Radar Analysis</div>
+            <div class="radar-wrap">
+              <canvas id="radarChart" role="img" aria-label="Radar chart showing manipulation scores"></canvas>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="action-row">
+            <button class="action-btn" onclick="copyResults()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy Results
+            </button>
+            <button class="action-btn" onclick="downloadPDF()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download PDF
+            </button>
+            <button class="action-btn" onclick="shareResults()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              Share
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT PAGE -->
+<div class="page" id="page-about">
+  <div class="about-hero">
+    <div class="hero-tag" style="margin-bottom:20px"><div class="pulse-dot"></div>About Manipulens</div>
+    <h2 style="background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Built for Media Literacy</h2>
+    <p style="font-size:16px;color:var(--text2);max-width:560px;margin:16px auto 0;line-height:1.7">In an age of information warfare, Manipulens empowers people to recognize psychological manipulation before it shapes their beliefs.</p>
+  </div>
+
+  <div class="about-content">
+    <div class="panel">
+      <div class="panel-title">🎯 The Mission</div>
+      <p style="font-size:14px;color:var(--text2);line-height:1.8">Manipulens was built to address a critical gap in media literacy tools. Most fact-checkers verify <em>what</em> is said — we analyze <em>how</em> it's said. Manipulation often works not through lies, but through emotional exploitation, urgency, fear, and tribal signaling.</p>
+      <br>
+      <p style="font-size:14px;color:var(--text2);line-height:1.8">Our AI model is trained to recognize 7 distinct psychological manipulation vectors across any form of written content — from political tweets to marketing copy.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-title">🔬 How It Works</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="min-width:28px;height:28px;border-radius:50%;background:rgba(99,179,237,0.15);border:0.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--cyan)">1</div>
+          <div><div style="font-size:13px;font-weight:600;margin-bottom:4px">Text Ingestion</div><div style="font-size:12px;color:var(--text2)">You paste any text content for analysis</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="min-width:28px;height:28px;border-radius:50%;background:rgba(183,148,244,0.15);border:0.5px solid rgba(183,148,244,0.3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--purple)">2</div>
+          <div><div style="font-size:13px;font-weight:600;margin-bottom:4px">AI Analysis</div><div style="font-size:12px;color:var(--text2)">Grok AI scores 7 psychological manipulation dimensions</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="min-width:28px;height:28px;border-radius:50%;background:rgba(104,211,145,0.15);border:0.5px solid rgba(104,211,145,0.3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--green)">3</div>
+          <div><div style="font-size:13px;font-weight:600;margin-bottom:4px">Visual Results</div><div style="font-size:12px;color:var(--text2)">Results displayed as scores, charts, and AI explanations</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-title">👥 The Team <div class="line"></div></div>
+  <div class="team-grid">
+    <div class="team-grid" style="display:flex;justify-content:center">
+  <div class="team-card" style="max-width:420px;width:100%;padding:32px">
+    
+    <div class="avatar" 
+      style="width:72px;height:72px;font-size:28px;
+      background:rgba(99,179,237,0.1);
+      border-color:rgba(99,179,237,0.3)">
+      👤
+    </div>
+
+    <div class="team-name" style="font-size:22px;margin-top:10px">
+      Swastik Jain
+    </div>
+
+    <div style="
+      font-size:13px;
+      color:var(--text2);
+      line-height:1.8;
+      margin-top:14px">
+      Creator of Manipulens — an AI-powered platform focused on detecting emotional manipulation, clickbait, fear tactics, and bias in digital content.
+    </div>
+
+    <div style="
+      margin-top:20px;
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      flex-wrap:wrap">
+      
+      <div class="badge badge-cyan">🧠 AI Analysis</div>
+      <div class="badge badge-purple">⚡ Frontend Design</div>
+      <div class="badge badge-green">📊 Data Visualization</div>
+    </div>
+
+    <div style="
+      margin-top:22px;
+      padding-top:18px;
+      border-top:0.5px solid var(--border);
+      font-size:12px;
+      color:var(--text3);
+      line-height:1.7">
+      Built as a buildathon project to promote media literacy and help users recognize manipulation patterns across social media, news, and online content.
+    </div>
+
+  </div>
+</div>
+
+  <div class="panel" style="margin-top:24px;text-align:center;padding:36px">
+    <div style="font-size:40px;margin-bottom:16px">🏆</div>
+    <h3 style="font-size:20px;font-weight:700;margin-bottom:10px">BUILD-A-THON Project 2026</h3>
+    <p style="font-size:14px;color:var(--text2);max-width:400px;margin:0 auto;line-height:1.7">Manipulens was built as a submission for the AI for BUILD-A-THON, focusing on combating digital manipulation and misinformation.</p>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap">
+      <div class="badge badge-cyan">🥇 Best AI App</div>
+      <div class="badge badge-purple">🎯 Most Impactful</div>
+      <div class="badge badge-green">✅ Open Source</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+let currentResult = null;
+let history = [];
+let radarChartInstance = null;
+let scanAnim = null;
+
+const EXAMPLES = {
+  political: "BREAKING: The radical left is DESTROYING our country RIGHT NOW. If you don't vote against them this November, say goodbye to your freedom, your family, and everything you've worked for. They HATE you and everything America stands for. SHARE THIS before they silence us!",
+  clickbait: "You Won't BELIEVE What Scientists Just Discovered About Your Morning Coffee!! This changes EVERYTHING (doctors are STUNNED) 😱🔥",
+  fear: "WARNING: Your bank account could be WIPED OUT overnight. Millions of Americans have NO IDEA about this hidden threat. The window to protect yourself is CLOSING. Act NOW or lose everything you've saved.",
+  neutral: "The Federal Reserve raised interest rates by 0.25 percentage points on Wednesday, citing continued efforts to bring inflation closer to its 2% target. The decision was widely anticipated by economists and financial markets."
+};
+
+const SIM_POSTS = {
+  fear: "🚨 ALERT: Scientists confirm new virus spreading UNCONTROLLED across 40 states. Government HIDING the truth. Stock up NOW before shelves are empty. Your family's safety is at stake. RT to save lives!!",
+  anger: "These ELITES are laughing at you while they steal YOUR money. They think you're too stupid to notice. It's time to FIGHT BACK. Are you going to let them get away with it?? 😡🔥",
+  clickbait: "This 73-year-old grandma discovered ONE WEIRD TRICK that doctors don't want you to know about! She lost 40 pounds in 2 weeks and doctors are FURIOUS 😱 (click to see what she did)",
+  neutral: "Today's city council meeting approved a new budget allocation for road maintenance. The $2.3M fund will be distributed across 12 districts over the next fiscal year."
+};
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function loadExample(type) {
+  const ta = document.getElementById('inputText');
+  ta.value = EXAMPLES[type];
+  updateCharCount();
+}
+
+function setSimPost(type) {
+  document.getElementById('simBody').textContent = SIM_POSTS[type];
+}
+
+function analyzeSimPost() {
+  const text = document.getElementById('simBody').textContent;
+  document.getElementById('inputText').value = text;
+  showPage('analyzer');
+  setTimeout(()=>{ document.querySelectorAll('.nav-btn')[1].classList.add('active'); },50);
+  setTimeout(runAnalysis, 300);
+}
+
+function updateCharCount() {
+  const len = document.getElementById('inputText').value.length;
+  document.getElementById('charCount').textContent = len + ' characters';
+}
+document.getElementById('inputText').addEventListener('input', updateCharCount);
+
+const TYPING_MSGS = [
+  "Scanning for fear manipulation patterns...",
+  "Measuring emotional pressure levels...",
+  "Detecting clickbait signatures...",
+  "Analyzing urgency and anger triggers...",
+  "Calculating neutrality index...",
+  "Identifying bias vectors...",
+  "Computing Manipulation Meter..."
+];
+
+function setLoading(state) {
+  const btn = document.getElementById('analyzeBtn');
+  const btnText = document.getElementById('btnText');
+  const shimmer = document.getElementById('btnShimmer');
+  const loadingBar = document.getElementById('loadingBar');
+  
+  if(state) {
+    btn.disabled = true;
+    btnText.textContent = '⚡ Analyzing...';
+    shimmer.style.display = 'block';
+    loadingBar.style.width = '30%';
+    document.getElementById('emptyResults').style.display = 'none';
+    document.getElementById('typingState').style.display = 'block';
+    document.getElementById('resultsContent').style.display = 'none';
+    startScanAnimation();
+    
+    let i = 0;
+    window._typingInterval = setInterval(()=>{
+      document.getElementById('typingMsg').textContent = TYPING_MSGS[i % TYPING_MSGS.length];
+      i++;
+    }, 1200);
+    
+    setTimeout(()=>loadingBar.style.width='70%', 1000);
+  } else {
+    btn.disabled = false;
+    btnText.textContent = '🔍 Analyze Manipulation';
+    shimmer.style.display = 'none';
+    loadingBar.style.width = '100%';
+    clearInterval(window._typingInterval);
+    stopScanAnimation();
+    setTimeout(()=>{ loadingBar.style.width='0'; loadingBar.style.transition='none'; setTimeout(()=>loadingBar.style.transition='width 0.3s',50); },600);
+  }
+}
+
+function startScanAnimation() {
+  const line = document.getElementById('scanLine');
+  if(!line) return;
+  let angle = 0;
+  scanAnim = setInterval(()=>{
+    angle = (angle + 3) % 360;
+    const rad = (angle-90) * Math.PI/180;
+    const x2 = 60 + 50*Math.cos(rad);
+    const y2 = 60 + 50*Math.sin(rad);
+    const lineEl = line.querySelector('line');
+    if(lineEl) { lineEl.setAttribute('x2',x2); lineEl.setAttribute('y2',y2); }
+  }, 30);
+}
+function stopScanAnimation() {
+  if(scanAnim) { clearInterval(scanAnim); scanAnim = null; }
+}
+
+async function runAnalysis() {
+  const text = document.getElementById('inputText').value.trim();
+  if(!text) { showNotif('⚠️ Please paste some text to analyze first.'); return; }
+  if(text.length < 10) { showNotif('⚠️ Text too short. Try something longer.'); return; }
+  
+  setLoading(true);
+  
+  const systemPrompt = `You are a psychological manipulation detection AI. Analyze the given text and return ONLY a valid JSON object (no markdown, no explanation outside JSON) with these exact fields:
+{
+  "fear_score": <0-100 integer>,
+  "anger_score": <0-100 integer>,
+  "clickbait_score": <0-100 integer>,
+  "neutrality_score": <0-100 integer>,
+  "emotional_pressure_score": <0-100 integer>,
+  "toxicity_score": <0-100 integer>,
+  "bias_type": "<one of: Political, Commercial, Emotional, Ideological, Sensationalist, None>",
+  "manipulation_meter": <0-100 integer, weighted average of manipulation indicators>,
+  "explanation": "<2-3 sentence AI insight about the manipulation tactics detected>"
+}
+
+Scoring guide:
+- fear_score: measures fear-inducing language, threats, worst-case scenarios
+- anger_score: measures rage-bait, us-vs-them framing, outrage triggers
+- clickbait_score: measures withholding info, exaggeration, shocking claims
+- neutrality_score: measures balanced, factual, objective tone (100=perfectly neutral)
+- emotional_pressure_score: measures urgency, FOMO, pressure to act immediately
+- toxicity_score: measures hostile, divisive, dehumanizing language
+- manipulation_meter: overall manipulation level (average of non-neutrality scores)
+
+Return ONLY the JSON object.`;
+
+  try {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer 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"
+  },
+  body: JSON.stringify({
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      {
+        role: "system",
+        content: systemPrompt
+      },
+      {
+        role: "user",
+        content: `Analyze this text for psychological manipulation:\n\n"${text}"`
+      }
+    ],
+    temperature: 0.3,
+    max_tokens: 1000
+  })
+});
+
+const data = await response.json();
+
+if (data.error) {
+  throw new Error(data.error.message);
+}
+
+const rawText = data.choices[0].message.content;
+
+const clean = rawText
+  .replace(/```json/g, "")
+  .replace(/```/g, "")
+  .trim();
+
+let result;
+
+try {
+  result = JSON.parse(clean);
+} catch (e) {
+  console.error("Invalid JSON:", clean);
+  throw new Error("AI returned invalid JSON");
+}    
+    currentResult = { ...result, text: text, timestamp: new Date() };
+    addToHistory(currentResult);
+    displayResults(result);
+    setLoading(false);
+  } catch(err) {
+    setLoading(false);
+    console.error(err);
+    // Fallback demo result
+    const demo = {
+      fear_score: Math.floor(Math.random()*60)+20,
+      anger_score: Math.floor(Math.random()*50)+15,
+      clickbait_score: Math.floor(Math.random()*70)+10,
+      neutrality_score: Math.floor(Math.random()*40)+5,
+      emotional_pressure_score: Math.floor(Math.random()*55)+20,
+      toxicity_score: Math.floor(Math.random()*45)+10,
+      bias_type: ['Political','Emotional','Commercial','Sensationalist'][Math.floor(Math.random()*4)],
+      manipulation_meter: Math.floor(Math.random()*50)+30,
+      explanation: "Unable to reach AI server — showing demo data. This text appears to use emotional language patterns that may be designed to influence the reader's response. Review the scores above to understand the specific manipulation dimensions detected."
+    };
+    currentResult = { ...demo, text: text, timestamp: new Date() };
+    addToHistory(currentResult);
+    displayResults(demo);
+    showNotif('⚠️ Demo mode — API unavailable');
+  }
+}
+
+function getMeterColor(score) {
+  if(score < 30) return 'var(--green)';
+  if(score < 60) return 'var(--orange)';
+  return 'var(--red)';
+}
+function getRiskLabel(score) {
+  if(score < 30) return { text:'LOW RISK', color:'var(--green)' };
+  if(score < 50) return { text:'MODERATE', color:'var(--orange)' };
+  if(score < 75) return { text:'HIGH RISK', color:'var(--red)' };
+  return { text:'CRITICAL', color:'#ff0040' };
+}
+function getBarColor(key) {
+  const map = {
+    fear_score:'linear-gradient(90deg,#fc8181,#ff4d4d)',
+    anger_score:'linear-gradient(90deg,#f6ad55,#ff8c00)',
+    clickbait_score:'linear-gradient(90deg,#b794f4,#9b59b6)',
+    neutrality_score:'linear-gradient(90deg,#68d391,#00c851)',
+    emotional_pressure_score:'linear-gradient(90deg,#f687b3,#e91e63)',
+    toxicity_score:'linear-gradient(90deg,#faf089,#f0c030)'
+  };
+  return map[key] || 'linear-gradient(90deg,var(--cyan),var(--purple))';
+}
+
+function displayResults(result) {
+  document.getElementById('typingState').style.display = 'none';
+  document.getElementById('resultsContent').style.display = 'block';
+  
+  // Meter
+  const score = result.manipulation_meter;
+  const circumference = 2 * Math.PI * 58;
+  const offset = circumference - (score/100)*circumference;
+  document.getElementById('meterNum').textContent = '0';
+  document.getElementById('meterArc').style.strokeDashoffset = circumference;
+  
+  setTimeout(()=>{
+    document.getElementById('meterArc').style.strokeDashoffset = offset;
+    animateNumber('meterNum', 0, score, 1500);
+  }, 100);
+  
+  const risk = getRiskLabel(score);
+  const rl = document.getElementById('riskLabel');
+  rl.textContent = risk.text;
+  rl.style.color = risk.color;
+  
+  // Score bars
+  const scoreKeys = [
+    { key:'fear_score', label:'Fear Manipulation' },
+    { key:'anger_score', label:'Anger Trigger' },
+    { key:'clickbait_score', label:'Clickbait Pattern' },
+    { key:'neutrality_score', label:'Neutrality Index' },
+    { key:'emotional_pressure_score', label:'Emotional Pressure' },
+    { key:'toxicity_score', label:'Toxicity Level' }
+  ];
+  
+  const barsHtml = scoreKeys.map(({key,label})=>{
+    const val = result[key] || 0;
+    const color = getBarColor(key);
+    return `<div class="score-item">
+      <div class="score-header">
+        <span class="score-name">${label}</span>
+        <span class="score-val" style="color:${key==='neutrality_score'?'var(--green)':'var(--text)'}">${val}</span>
+      </div>
+      <div class="score-bar-bg">
+        <div class="score-bar" data-width="${val}" style="background:${color}"></div>
+      </div>
+    </div>`;
+  }).join('');
+  
+  document.getElementById('scoreBars').innerHTML = barsHtml;
+  
+  setTimeout(()=>{
+    document.querySelectorAll('.score-bar[data-width]').forEach(bar=>{
+      bar.style.width = bar.dataset.width + '%';
+    });
+  }, 100);
+  
+  // Badges
+  const badges = [];
+  if(result.bias_type && result.bias_type !== 'None') badges.push(`<div class="badge badge-purple">⚡ ${result.bias_type} Bias</div>`);
+  if(result.fear_score > 60) badges.push('<div class="badge badge-red">🚨 Fear Tactic</div>');
+  if(result.clickbait_score > 65) badges.push('<div class="badge badge-orange">🎣 Clickbait</div>');
+  if(result.anger_score > 65) badges.push('<div class="badge badge-red">😤 Rage Bait</div>');
+  if(result.emotional_pressure_score > 60) badges.push('<div class="badge badge-orange">⏰ Urgency Push</div>');
+  if(result.neutrality_score > 60) badges.push('<div class="badge badge-green">✅ Relatively Neutral</div>');
+  if(result.manipulation_meter > 80) badges.push('<div class="badge badge-red">⚠️ High Manipulation</div>');
+  document.getElementById('badgesRow').innerHTML = badges.join('');
+  
+  // Explanation
+  document.getElementById('explanationText').textContent = result.explanation;
+  
+  // Chart
+  buildRadarChart(result);
+}
+
+function buildRadarChart(result) {
+  if(radarChartInstance) { radarChartInstance.destroy(); radarChartInstance = null; }
+  const ctx = document.getElementById('radarChart');
+  radarChartInstance = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['Fear', 'Anger', 'Clickbait', 'Pressure', 'Toxicity', 'Neutrality'],
+      datasets: [{
+        label: 'Manipulation Profile',
+        data: [
+          result.fear_score,
+          result.anger_score,
+          result.clickbait_score,
+          result.emotional_pressure_score,
+          result.toxicity_score,
+          result.neutrality_score
+        ],
+        backgroundColor: 'rgba(99,179,237,0.1)',
+        borderColor: '#63b3ed',
+        pointBackgroundColor: '#b794f4',
+        pointBorderColor: '#63b3ed',
+        pointHoverBackgroundColor: '#fff',
+        borderWidth: 1.5,
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { stepSize: 25, color: '#64748b', font: { size: 10 }, backdropColor: 'transparent' },
+          grid: { color: 'rgba(99,179,237,0.1)' },
+          pointLabels: { color: '#94a3b8', font: { size: 11, family: "'Space Grotesk'" } },
+          angleLines: { color: 'rgba(99,179,237,0.1)' }
+        }
+      }
+    }
+  });
+}
+
+function animateNumber(id, from, to, duration) {
+  const el = document.getElementById(id);
+  const start = performance.now();
+  function step(now) {
+    const p = Math.min((now-start)/duration,1);
+    const ease = p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+    el.textContent = Math.round(from+(to-from)*ease);
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function addToHistory(result) {
+  history.unshift(result);
+  if(history.length > 8) history.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  const container = document.getElementById('historyList');
+  if(!history.length) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>No analyses yet.</p></div>';
+    return;
+  }
+  container.innerHTML = history.map((h,i)=>{
+    const color = getMeterColor(h.manipulation_meter);
+    const timeAgo = getTimeAgo(h.timestamp);
+    const short = h.text.length>60 ? h.text.substring(0,60)+'...' : h.text;
+    return `<div class="history-item" onclick="reloadHistory(${i})">
+      <div class="history-text">${short}</div>
+      <div class="history-meta">
+        <span class="history-score" style="color:${color}">${h.manipulation_meter}</span>
+        <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,0.05);color:var(--text3)">${h.bias_type}</span>
+        <span class="history-time">${timeAgo}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function reloadHistory(idx) {
+  currentResult = history[idx];
+  document.getElementById('inputText').value = history[idx].text;
+  updateCharCount();
+  document.getElementById('emptyResults').style.display = 'none';
+  displayResults(history[idx]);
+}
+
+function getTimeAgo(date) {
+  const diff = (Date.now()-new Date(date).getTime())/1000;
+  if(diff<60) return 'just now';
+  if(diff<3600) return Math.floor(diff/60)+'m ago';
+  return Math.floor(diff/3600)+'h ago';
+}
+
+function copyResults() {
+  if(!currentResult) { showNotif('Run an analysis first!'); return; }
+  const text = `MANIPULENS ANALYSIS\n${'='.repeat(30)}\nManipulation Meter: ${currentResult.manipulation_meter}/100\nFear Score: ${currentResult.fear_score}\nAnger Score: ${currentResult.anger_score}\nClickbait Score: ${currentResult.clickbait_score}\nNeutrality: ${currentResult.neutrality_score}\nEmotional Pressure: ${currentResult.emotional_pressure_score}\nToxicity: ${currentResult.toxicity_score}\nBias Type: ${currentResult.bias_type}\n\nAI Insight: ${currentResult.explanation}`;
+  navigator.clipboard.writeText(text).then(()=>showNotif('✅ Results copied to clipboard!')).catch(()=>showNotif('📋 Copy failed — try manually'));
+}
+
+function shareResults() {
+  if(!currentResult) { showNotif('Run an analysis first!'); return; }
+  const text = `I analyzed this content with Manipulens — Manipulation Score: ${currentResult.manipulation_meter}/100 (${currentResult.bias_type} bias detected) 🔍`;
+  if(navigator.share) { navigator.share({title:'Manipulens Analysis',text}); }
+  else { navigator.clipboard.writeText(text).then(()=>showNotif('📋 Share text copied!')); }
+}
+
+function downloadPDF() {
+  if(!currentResult) { showNotif('Run an analysis first!'); return; }
+  showNotif('📄 PDF download — integrate jsPDF in production build');
+}
+
+function showNotif(msg) {
+  const el = document.getElementById('notif');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 3200);
+}
+
+// Scan animation on all bars on load
+window.addEventListener('load', ()=>{
+  document.querySelectorAll('.score-bar[style*="width:"]').forEach(bar=>{
+    const w = bar.style.width;
+    bar.style.width = '0';
+    setTimeout(()=>{ bar.style.width = w; }, 100);
+  });
+});
+</script>
+</body>
+</html>
